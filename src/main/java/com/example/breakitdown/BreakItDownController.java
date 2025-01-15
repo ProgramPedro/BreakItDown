@@ -1,5 +1,7 @@
 package com.example.breakitdown;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Label;
@@ -20,6 +22,8 @@ public class BreakItDownController {
     private Label submitText;
     @FXML
     private TextField spotifyPlaylistURL;
+    @FXML
+    private PieChart pieChart;
 
     private String spotifyURL;
 
@@ -83,6 +87,10 @@ public class BreakItDownController {
                 //Used to count the unique words in the genreArrayList
                 ArrayList<String> cycledWords = new ArrayList<>();
 
+                //List that will contain all PieChart data
+                //Will hold genre names, and their percentage
+                ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+
                 for (String genre : genreArrayList) {
                     if (!cycledWords.contains(genre)) {
                         cycledWords.add(genre);
@@ -99,15 +107,19 @@ public class BreakItDownController {
                         double percentage = ((double)count/totalGenres) * 100;
                         System.out.printf("%s: %%%.2f", genre, percentage);
 
-                        //PieChart.Data slice = new PieChart.Data(genre, percentage);
-                        //pieChart.getData().add(slice);
+                        pieChartData.add(new PieChart.Data(genre, percentage));
 
                         System.out.println();
                     }
                 }
 
                 //Update the UI after processing is complete
-                Platform.runLater(() -> submitText.setText("Your playlist just hit the floor - BREAK IT DOWN!"));
+                Platform.runLater(() -> {
+                    pieChart.setTitle("The Genre Breakdown");
+                    pieChart.setData(pieChartData);
+                    pieChart.setPrefSize(600, 600);
+                    submitText.setText("Your playlist just hit the floor - BREAK IT DOWN!");
+                });
 
                 //Wait for python script to finish and get the exit code to end the process
                 int exitCode = process.waitFor();

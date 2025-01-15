@@ -15,7 +15,7 @@ public class BreakItDownApplication extends Application {
         Image iconImage = new Image(Objects.requireNonNull(BreakItDownApplication.class.getResourceAsStream("/Images/breakItDownIcon.png")));
 
         FXMLLoader fxmlLoader = new FXMLLoader(BreakItDownApplication.class.getResource("playlist-submission.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
+        Scene scene = new Scene(fxmlLoader.load(), 400, 400);
         stage.setTitle("Break-It-Down");
         stage.getIcons().add(iconImage);
         stage.setScene(scene);

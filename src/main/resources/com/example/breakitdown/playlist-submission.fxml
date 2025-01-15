@@ -22,5 +22,5 @@
   <Label fx:id="submitText" textFill="#846854" />
    <TextField fx:id="spotifyPlaylistURL" promptText="Spotify playlist url..." style="-fx-background-color: #eee9e0;" />
   <Button onAction="#onSubmitButtonClick" style="-fx-background-color: #846854; -fx-text-fill: #eee9e0;" text="Submit" />
-   <PieChart />
+   <PieChart fx:id="pieChart" prefHeight="67.0" prefWidth="500.0" />
 </VBox>
