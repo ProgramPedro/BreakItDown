@@ -1,13 +1,11 @@
 package com.example.breakitdown;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.chart.PieChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-
-import com.google.gson.Gson;
+import javafx.application.Platform;
+import javafx.embed.swing.SwingNode;
+import javafx.scene.layout.AnchorPane;
 
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -15,7 +13,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.ArrayList;
-import javafx.application.Platform;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.chart.ChartPanel;
+
+import com.google.gson.Gson;
 
 public class BreakItDownController {
     @FXML
@@ -23,7 +27,7 @@ public class BreakItDownController {
     @FXML
     private TextField spotifyPlaylistURL;
     @FXML
-    private PieChart pieChart;
+    private AnchorPane pieChartContainer;
 
     private String spotifyURL;
 
@@ -72,6 +76,11 @@ public class BreakItDownController {
                     line = line.replace("[", "");
                     line = line.replace("]", "");
 
+                    //Makes sure no empty lines are
+                    if (line.isEmpty()) {
+                        continue;
+                    }
+
                     String[] individualGenres = line.split(", ");
 
                     Collections.addAll(genreArrayList, individualGenres);
@@ -87,11 +96,12 @@ public class BreakItDownController {
                 //Used to count the unique words in the genreArrayList
                 ArrayList<String> cycledWords = new ArrayList<>();
 
-                //List that will contain all PieChart data
+                //Dataset that will contain all PieChart data
                 //Will hold genre names, and their percentage
-                ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+                DefaultPieDataset pieChartData = new DefaultPieDataset();
 
                 for (String genre : genreArrayList) {
+                    //Checks for unique genres (if the cycledWords array encounters a unique genre, add it to the array
                     if (!cycledWords.contains(genre)) {
                         cycledWords.add(genre);
                         int count = 0;
@@ -105,19 +115,35 @@ public class BreakItDownController {
 
                         //Calculate the percentage
                         double percentage = ((double)count/totalGenres) * 100;
-                        System.out.printf("%s: %%%.2f", genre, percentage);
 
-                        pieChartData.add(new PieChart.Data(genre, percentage));
-
-                        System.out.println();
+                        //Add the genre and percentage to the pieChartData dataset
+                        pieChartData.setValue(genre, percentage);
                     }
                 }
 
                 //Update the UI after processing is complete
                 Platform.runLater(() -> {
-                    pieChart.setTitle("The Genre Breakdown");
-                    pieChart.setData(pieChartData);
-                    pieChart.setPrefSize(600, 600);
+                    //Create the pieChart with the title, dataset, legend, and tooltips
+                    JFreeChart pieChart = ChartFactory.createPieChart(
+                            "Music Genre Breakdown",
+                            pieChartData,
+                            true,
+                            true,
+                            false
+                    );
+
+                    //Convert JFreeChart into a Swing ChartPanel
+                    ChartPanel chartPanel = new ChartPanel(pieChart);
+                    SwingNode swingNode = new SwingNode();
+
+                    //Set the content of the swingnode to be the chartPanel
+                    swingNode.setContent(chartPanel);
+
+                    //Clear the existing content of the chartContainer and add the new chart created using the swingnode
+                    pieChartContainer.getChildren().clear();
+                    pieChartContainer.getChildren().add(swingNode);
+
+                    //Display text that the playlist has been processed
                     submitText.setText("Your playlist just hit the floor - BREAK IT DOWN!");
                 });
 
